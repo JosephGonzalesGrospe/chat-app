@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/index.css">
+    
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>   
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="chat.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
+</head>
+<body>
+        
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2" id="personal"> 
+                </div>
+                <div class="col-sm-2" id="group">   
+                </div>
+                    <div class="col-sm-8">
+                        <div class="chatbody">
+                            <table class="table">
+                            </table>
+                        </div>
+                        <div class="row" id='form'>
+                            <div class="col-xs-9">
+                                <input type="text" class="form-control" id="aform" />
+                            </div>
+                            <div class="col-xs-3">
+                              <button class="btn btn-info btn-block" id="abtn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+</body>
+</html>
