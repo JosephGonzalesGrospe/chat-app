@@ -1,33 +1,59 @@
 $(() => {
     let socket = io()
-
     let url = new URL (window.location)
-    let username = url.searchParams.get('username')
+    let reciever = url.searchParams.get('reciever')
     let me = url.searchParams.get('sender')
     let group = url.searchParams.get('group')
 
-    $(document).on('click', '#join', () => {
-      console.log('asdasd')
-      socket.emit('join:group', {gc_name: group, gc_member: me})
-    });
+    $(".msg_histo").animate({ scrollTop: $(document).height() }, 1000);
 
-    if (username) {
-      socket.emit('new:connection', { sender: me, reciever: username })
-      socket.emit('load:messages', { sender: me, reciever: username })
 
-      $(document).on('click', '#abtn', () => {
+    if ( !reciever || !group ) {
+      $(".write_msg").prop("disabled", true)
+      $(".msg_send_btn").prop("disabled", true)
+    }
+
+    if($("#toggle").prop("checked", true)) {
+      socket.emit('load:users')
+    }
+
+    $(document).on('click', '#toggle', function() {
+      if (this.checked) {
+        socket.emit('load:users')
+      } else {
+        socket.emit('load:groups')
+      }
+    })
+
+    if (reciever) {  
+      $("#toggle").prop("checked", true);
+      $(".write_msg").prop("disabled", false)
+      $(".msg_send_btn").prop("disabled", false)
+
+      socket.emit('new:connection', { sender: me, reciever: reciever })
+      socket.emit('load:messages', { sender: me, reciever: reciever })
+
+      $(document).on('click', '.msg_send_btn', () => {
         console.log('personal')
-        socket.emit('new:message', { sender: me, reciever: username, message: $('.form-control').val() })
+        socket.emit('new:message', { sender: me, reciever: reciever, message: $('.write_msg').val() })
+        $('.write_msg').val('')
       });
     }
 
     if (group) {
+      socket.emit("join:group", {gc_name: group, gc_member: me})
+      $("#toggle").prop("checked", false);
+      $(".write_msg").prop("disabled", false)
+      $(".msg_send_btn").prop("disabled", false)
+
+      socket.emit('load:groups');
       socket.emit('check:group', { gc_name: group, gc_member: me })
 
-    $(document).on('click', '#bbtn', () => {
-      console.log('group')
-      socket.emit('new:group_message', {gc_name: group, gc_member: me, message: $('.form-control').val() })
-    });
+      $(document).on('click', '.msg_send_btn', () => {
+        console.log('group')
+        socket.emit('new:group_message', {gc_name: group, gc_member: me, message: $('.write_msg').val() })
+        $('.write_msg').val('')
+      });
     }
 
     socket.on('new:connection', function(msgObject){
@@ -48,7 +74,8 @@ $(() => {
       }
       
       $.ajax(settings).done(function (response) {
-        socket.emit('load:messages', {sender: me, reciever: username}); 
+        socket.emit('load:messages', {sender: me, reciever: reciever}); 
+        socket.emit('load:users');
       });
     });
   
@@ -72,7 +99,7 @@ $(() => {
       }
       
       $.ajax(settings).done(function (response) {
-        socket.emit('load:messages', {sender: me, reciever: username}); 
+        socket.emit('load:messages', {sender: me, reciever: reciever}); 
       });
     });
     
@@ -90,20 +117,34 @@ $(() => {
       }
       $.ajax(settings)
         .done( (response) => {
+          var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
           var txt = ''
+          console.log(response)
           $( response.data ).each( (i) => {
             var date = new Date(response.data[i].timestamp)
-            txt += `<tr>
-                      <td><img src="http://via.placeholder.com/80x50?text=${response.data[i].sender}" /></td>
-                      <td>${response.data[i].message}</td>
-                      <td>${date.getHours()}:${date.getMinutes()}</td>
-                   </tr>`
-            $(".table").html(txt);
+            var monthNow = months[date.getMonth()-1]
+            if (response.data[i].sender == reciever) {
+              txt += `<div class="incoming_msg">
+                    <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                    <div class="received_msg">
+                    <div class="received_withd_msg">
+                    <p>${response.data[i].message}</p>
+                    <span class="time_date"> ${date.getHours()}:${date.getMinutes()}   |    ${monthNow} ${date.getDate()}</span></div><br>
+                    </div>
+                    </div>`
+            } else {
+              txt += `<div class="outgoing_msg">
+                      <div class="sent_msg">
+                      <p>${response.data[i].message}</p>
+                      <span class="time_date"> ${date.getHours()}:${date.getMinutes()}   |     ${monthNow} ${date.getDate()}</span></div>
+                      </div>`
+              }
+            
+            $(".msg_history").html(txt);
           })  
         });
     });
-    
-    socket.emit('load:users');
+
     socket.on('load:users', function(){
       var settings = {
         "async": true,
@@ -120,20 +161,22 @@ $(() => {
         .done( (response) => {
           var text = ''
           $( response.data ).each( (i) => {
-            text +=  `<a href="?sender=${me}&username=${response.data[i].username}" class="chatperson-${response.data[i].username}">
-            <span class="chatimg">'
-            <img src="http://via.placeholder.com/100x100?text=${response.data[i].username}" alt="" />
-            </span> 
-            <div class="namechat"> 
-            </div> 
-            </a><br>`
-            $("#personal").html(text);
+            text +=  `<a href="?sender=${me}&reciever=${response.data[i].username}"><div class="chat_list active_chat" style="cursor: pointer;" >
+                     <div class="chat_people">
+                     <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                     <div class="chat_ib">
+                     <h5>${response.data[i].username}<span class="chat_date">Dec 25</span></h5>
+                     <p>Test, which is a new approach to have all solutions 
+                      astrology under one roof.</p>
+                     </div>
+                     </div>
+                     </div>`
+            $(".inbox_chat").html(text);
           })  
           
         });
     });
 
-    socket.emit('load:groups');
     socket.on('load:groups', function(){
       var settings = {
         "async": true,
@@ -152,16 +195,48 @@ $(() => {
         .done( (response) => {
           var text = ''
           $( response.data ).each( (i) => {
-            text +=  `<a href="?sender=${me}&group=${response.data[i].gc_name}">
-            <span class="chatimg">'
-            <img src="http://via.placeholder.com/100x100?text=${response.data[i].gc_name}" alt="" />
-            </span> 
-            <div class="namechat"> 
-            </div> 
-            </a><br>`
-            $("#group").html(text);
+            var settings1 = {
+              "async": true,
+              "crossDomain": true,
+              "url": `http://localhost:3000/api/messages/check_group/${response.data[i].gc_name}/${me}`,
+              "method": "GET",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "cache-control": "no-cache",
+                "Postman-Token": "9594ab96-89a7-4349-b657-961a90a9643a"
+              },
+              "data": {}
+            }
+                
+            $.ajax(settings1)
+              .done( (response1) => {
+                if(response1.isMember == true) {
+                  text +=  `<a href="?sender=${me}&group=${response.data[i].gc_name}"><div class="chat_list active_chat" style="cursor: pointer;" >
+                     <div class="chat_people">
+                     <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                     <div class="chat_ib">
+                     <h5>${response.data[i].gc_name}<span class="chat_date">Dec 25</span></h5>
+                     <p>Test, which is a new approach to have all solutions 
+                      astrology under one roof.</p>
+                     </div>
+                     </div>
+                     </div>`
+                    $(".inbox_chat").html(text);
+                }
+                else if (response1.isMember == false) {
+                  text +=  `<a href="?sender=${me}&group=${response.data[i].gc_name}"><div class="chat_list active_chat" style="cursor: pointer;" >
+                  <div class="chat_people">
+                  <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                  <div class="chat_ib">
+                  <h5>${response.data[i].gc_name}</h5>
+                  <button type="button" class="btn btn-info" onclick="joinGroup(${response.data[i].gc_name})">Join Group</button>
+                  </div>
+                  </div>
+                  </div>`
+                 $(".inbox_chat").html(text);
+                }
+              });
           })  
-          
         });
     });
 
@@ -181,20 +256,11 @@ $(() => {
           
       $.ajax(settings)
         .done( (response) => {
-          console.log(response)
           if(response.isMember == true) {
             console.log(response.isMember)
             socket.emit('load:group_messages', {gc_name: msgObject.gc_name})
-            var text = `<div class="col-xs-9">
-                       <input type="text" class="form-control" id="bform"/>
-                       </div>
-                       <div class="col-xs-3">
-                       <button class="btn btn-info btn-block" id="bbtn">Send</button>
-                       </div>`  
-              $('#form').html(text)
           }
           else if (response.isMember == false) {
-            console.log(response.isMember)
             var text = `<div class="col-xs-3">
                         <button class="btn btn-info btn-block" id="join">Join Conversation</button>
                         </div>`
@@ -220,15 +286,29 @@ $(() => {
       $.ajax(settings)
         .done( (response) => {
           console.log(response)
+          var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
           var txt = ''
           $( response.data ).each( (i) => {
             var date = new Date(response.data[i].timestamp)
-            txt += `<tr>
-                      <td><img src="http://via.placeholder.com/80x50?text=${response.data[i].sender}" /></td>
-                      <td>${response.data[i].message}</td>
-                      <td>${date.getHours()}:${date.getMinutes()}</td>
-                   </tr>`
-            $(".table").html(txt);
+            var monthNow = months[date.getMonth()-1]
+            if (response.data[i].sender != me) {
+              txt += `<div class="incoming_msg">
+                    <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                    <div class="received_msg">
+                    <div class="received_withd_msg">
+                    <p>${response.data[i].message}</p>
+                    <span class="time_date">${response.data[i].sender}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ${date.getHours()}:${date.getMinutes()}   |    ${monthNow} ${date.getDate()}</span></div><br>
+                    </div>
+                    </div>`
+            } else {
+              txt += `<div class="outgoing_msg">
+                      <div class="sent_msg">
+                      <p>${response.data[i].message}</p>
+                      <span class="time_date"> ${date.getHours()}:${date.getMinutes()}   |     ${monthNow} ${date.getDate()}</span></div>
+                      </div>`
+              }
+            
+            $(".msg_history").html(txt);
           })  
         });
     });
@@ -257,13 +337,6 @@ $(() => {
             alert(response.error)
           } else {
             socket.emit('load:group_messages', {gc_name: msgObject.gc_name})
-            var text = `<div class="col-xs-9">
-                       <input type="text" class="form-control" id="bform"/>
-                       </div>
-                       <div class="col-xs-3">
-                       <button class="btn btn-info btn-block" id="bbtn">Send</button>
-                       </div>`
-              $('#form').html(text)
           }
       });
     })

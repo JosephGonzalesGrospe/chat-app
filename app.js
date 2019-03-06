@@ -83,12 +83,12 @@ http.listen(port, () => {
 
           // handle users
         client.on('load:users', function () {
-            io.emit('load:users');
+            client.emit('load:users');
           });
 
            // handle groups
         client.on('load:groups', function () {
-            io.emit('load:groups');
+            client.emit('load:groups');
           });
 
            // check if member

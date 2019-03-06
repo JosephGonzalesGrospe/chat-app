@@ -5,40 +5,119 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css" rel="stylesheet">
     
     
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>   
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="chat.js"></script>
-    <!------ Include the above in your HEAD tag ---------->
+
+    <style>
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      
+      .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+      
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+      
+      input:checked + .slider {
+        background-color: #05728f;
+      }
+      
+      input:focus + .slider {
+        box-shadow: 0 0 1px #05728f;
+      }
+      
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+      
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+      
+      .slider.round:before {
+        border-radius: 50%;
+      }
+      .msg_history {
+        overflow: auto;
+        position: relative;
+      }
+      </style>
+    
 </head>
 <body>
         
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-2" id="personal"> 
+        
+<div class="container">
+    <h3 class=" text-center">Messaging</h3>
+    <div class="messaging">
+          <div class="inbox_msg">
+            <div class="inbox_people">
+              <div class="headind_srch">
+                <label class="switch">
+                  <input type="checkbox" id="toggle"checked>
+                  <span class="slider round"></span>
+                </label>
+                <div class="srch_bar">
+                  <div class="stylish-input-group">
+                    <input type="text" class="search-bar"  placeholder="Search" >
+                    <span class="input-group-addon">
+                    <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                    </span> </div>
                 </div>
-                <div class="col-sm-2" id="group">   
+              </div>
+              <div class="inbox_chat">
+              </div>
+            </div>
+            <div class="mesgs">
+              <div class="msg_history">
+              </div>
+              <div class="type_msg">
+                <div class="input_msg_write">
+                  <input type="text" class="write_msg" placeholder="Type a message" />
+                  <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
                 </div>
-                    <div class="col-sm-8">
-                        <div class="chatbody">
-                            <table class="table">
-                            </table>
-                        </div>
-                        <div class="row" id='form'>
-                            <div class="col-xs-9">
-                                <input type="text" class="form-control" id="aform" />
-                            </div>
-                            <div class="col-xs-3">
-                              <button class="btn btn-info btn-block" id="abtn">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        </div>
+              </div>
+            </div>
+          </div>
+    </div>
+  </div>
 </body>
 </html>

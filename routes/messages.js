@@ -136,4 +136,11 @@ router.get('/group_messages/:gc_name', async (req, res) => {
     res.status(200).send({data: messages})
 })
 
+router.get('/active', async (req, res) => {
+    let actives = await User.find()
+    let group = await Group.find()
+    res.send({actives,group})
+    console.log(actives)
+})
+
 module.exports = router;
